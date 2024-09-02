@@ -2,7 +2,7 @@
 # Documentation : Connexion Automatique à un Réseau Wi-Fi et Configuration d'un Pont Réseau sur Proxmox
 
 ## Introduction
-Cette documentation couvre les étapes pour configurer un serveur Proxmox afin qu'il se connecte automatiquement à un réseau Wi-Fi au démarrage et pour configurer un pont réseau (`vmbr0`) dans le même réseau que l'interface Wi-Fi (`wlan0`). Ce guide inclut la création d'un script d'automatisation des commandes nécessaires et l'intégration de ce script dans le processus de démarrage du système à l'aide de deux méthodes : `/etc/rc.local` et `systemd`.
+Cette documentation couvre les étapes pour configurer un serveur Proxmox afin qu'il se connecte automatiquement à un réseau Wi-Fi au démarrage et pour configurer un pont réseau (`vmbr0`) dans le même réseau que l'interface Wi-Fi (`wlp3s0`). Ce guide inclut la création d'un script d'automatisation des commandes nécessaires et l'intégration de ce script dans le processus de démarrage du système à l'aide de deux méthodes : `/etc/rc.local` et `systemd`.
 
 ## 1. Prérequis
 Avant de commencer, assurez-vous que :
