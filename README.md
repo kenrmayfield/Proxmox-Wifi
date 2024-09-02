@@ -9,7 +9,11 @@ Avant de commencer, assurez-vous que :
 - Votre serveur Proxmox est équipé d'une carte Wi-Fi compatible.
 - Vous avez accès à votre réseau Wi-Fi (SSID et mot de passe).
 - Les outils nécessaires, comme `wpa_supplicant` et `dhclient`, sont installés sur votre système.
-
+installer wpa_supplicant
+```bash
+apt update
+apt install wpasupplicant
+```
 ## 2. Connexion Wi-Fi manuelle
 
 ### 2.1. Configurer `wpa_supplicant`
