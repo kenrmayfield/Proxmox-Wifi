@@ -9,7 +9,6 @@ Avant de commencer, assurez-vous que :
 - Votre serveur Proxmox est équipé d'une carte Wi-Fi compatible.
 - Vous avez accès à votre réseau Wi-Fi (SSID et mot de passe).
 - Les outils nécessaires, comme `wpa_supplicant` et `dhclient`, sont installés sur votre système.
-installer wpa_supplicant
 ```bash
 apt update
 apt install wpasupplicant
@@ -25,19 +24,15 @@ apt install wpasupplicant
     ```
 2. Ajouter la configuration du réseau :
     ```bash
-    ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-    update_config=1
-    country=FR
-
     network={
         ssid="votre_ssid"
         psk="votre_mot_de_passe"
     }
     ```
-3. Enregistrer et fermer le fichier avec `Ctrl+O` pour enregistrer et `Ctrl+X` pour quitter.
+3. Enregistrer et fermé le fichier avec `Ctrl+O` pour enregistrer `Ctrl+X`.
 
 ### 2.2. Connexion au réseau Wi-Fi
-Pour connecter manuellement votre serveur au réseau Wi-Fi, utilisez les commandes suivantes :
+Pour connecter manuellement votre serveur au réseau Wi-Fi, utilisez les commandes suivante :
 
 1. Démarrer `wpa_supplicant` :
     ```bash
@@ -122,7 +117,7 @@ Il existe deux principales méthodes pour exécuter ce script automatiquement au
     ```
 
 ## 4. Configuration du Pont Réseau (`vmbr0`) avec l'Interface Wi-Fi (actuellement en test)
-Proxmox utilise `vmbr0` pour connecter les machines virtuelles au réseau. Si vous souhaitez que `vmbr0` soit dans le même réseau que `wlan0` (votre interface Wi-Fi), vous devez configurer le pont réseau pour utiliser l'interface Wi-Fi.
+Proxmox utilise `vmbr0` pour connecter les machines virtuelles au réseau. Si vous souhaitez que `vmbr0` soit dans le même réseau que `wlp3s0` (votre interface Wi-Fi), vous devez configurer le pont réseau pour utiliser l'interface Wi-Fi.
 
 ### 4.1. Configurer `/etc/network/interfaces`
 
@@ -132,12 +127,12 @@ Proxmox utilise `vmbr0` pour connecter les machines virtuelles au réseau. Si vo
     ```
 2. Ajouter ou modifier la configuration suivante :
     ```bash
-    auto wlan0
-    iface wlan0 inet manual
+    auto wlp3s0
+    iface wlp3s0 inet manual
 
     auto vmbr0
     iface vmbr0 inet dhcp
-        bridge_ports wlan0
+        bridge_ports wlp3s0
         bridge_stp off
         bridge_fd 0
     ```
@@ -149,7 +144,7 @@ Proxmox utilise `vmbr0` pour connecter les machines virtuelles au réseau. Si vo
     ```
 
 ## 5. Résumé
-Vous avez configuré votre serveur Proxmox pour se connecter automatiquement à un réseau Wi-Fi au démarrage en utilisant un script shell, et vous avez intégré ce script dans le processus de démarrage en utilisant soit `/etc/rc.local`, soit un service `systemd`. De plus, vous avez configuré le pont réseau `vmbr0` pour fonctionner dans le même réseau que `wlan0`.
+Vous avez configuré votre serveur Proxmox pour se connecter automatiquement à un réseau Wi-Fi au démarrage en utilisant un script shell, et vous avez intégré ce script dans le processus de démarrage en utilisant soit `/etc/rc.local`, soit un service `systemd`. De plus, vous avez configuré le pont réseau `vmbr0` pour fonctionner dans le même réseau que `wlp3s0`.
 
 ## 6. Dépannage
 
