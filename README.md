@@ -117,7 +117,7 @@ Il existe deux principales méthodes pour exécuter ce script automatiquement au
     sudo systemctl start connect_wifi.service
     ```
 
-## 4. Configuration du Pont Réseau (`vmbr0`) avec l'Interface Wi-Fi
+## 4. Configuration du Pont Réseau (`vmbr0`) avec l'Interface Wi-Fi (actuellement en test)
 Proxmox utilise `vmbr0` pour connecter les machines virtuelles au réseau. Si vous souhaitez que `vmbr0` soit dans le même réseau que `wlan0` (votre interface Wi-Fi), vous devez configurer le pont réseau pour utiliser l'interface Wi-Fi.
 
 ### 4.1. Configurer `/etc/network/interfaces`
