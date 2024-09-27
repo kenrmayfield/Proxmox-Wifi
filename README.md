@@ -13,6 +13,7 @@ Avant de commencer, assurez-vous que :
 apt update
 apt install wpasupplicant
 ```
+- A partir de maintenant, Ethernet n'est plus nécessaire !
 ## 2. Connexion Wi-Fi manuelle
 
 ### 2.1. Configurer `wpa_supplicant`
