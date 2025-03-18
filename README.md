@@ -150,7 +150,7 @@ You have configured your Proxmox server to automatically connect to a Wi-Fi netw
 
 ## 6. Troubleshooting
 
-- **Check service status** : Si vous utilisez `systemd`, vous pouvez vérifier le statut du service pour diagnostiquer des problèmes :
+- **Check service status** : If you are using `systemd`, you can check service status to diagnose problems:
     ```bash
     sudo systemctl status connect_wifi.service
     ```
