@@ -1,98 +1,100 @@
 
-# Documentation : Connexion Automatique à un Réseau Wi-Fi et Configuration d'un Pont Réseau sur Proxmox
+# Documentation: Automatically Connecting to a Wi-Fi Network and Configuring a Network Bridge on Proxmox
 
 ## Introduction
-Cette documentation couvre les étapes pour configurer un serveur Proxmox afin qu'il se connecte automatiquement à un réseau Wi-Fi au démarrage et pour configurer un pont réseau (`vmbr0`) dans le même réseau que l'interface Wi-Fi (`wlp3s0`). Ce guide inclut la création d'un script d'automatisation des commandes nécessaires et l'intégration de ce script dans le processus de démarrage du système à l'aide de deux méthodes : `/etc/rc.local` et `systemd`.
+This documentation covers the steps to configure a Proxmox server to automatically connect to a Wi-Fi network at startup and to configure a network bridge `( vmbr0)` in the same network as the Wi-Fi interface `( wlp3s0)`. This guide includes creating a script to automate the necessary commands and integrating this script into the system startup process using two methods: `/etc/rc.local` and `systemd`.
 
-## 1. Prérequis
-Avant de commencer, assurez-vous que :
-- Votre serveur Proxmox est équipé d'une carte Wi-Fi compatible.
-- Vous avez accès à votre réseau Wi-Fi (SSID et mot de passe).
-- Les outils nécessaires, comme `wpa_supplicant` et `dhclient`, sont installés sur votre système.
+## 1. Prerequisites
+Before you begin, make sure that:
+- Your Proxmox server is equipped with a compatible Wi-Fi card.
+- You have access to your Wi-Fi network (SSID and password).
+- The necessary tools, like `wpa_supplicant` and `dhclient`, are installed on your system.
 ```bash
 apt update
 apt install wpasupplicant
 ```
-- A partir de maintenant, Ethernet n'est plus nécessaire !
-## 2. Connexion Wi-Fi manuelle
+- From now on, Ethernet is no longer necessary!
+## 2. Manual Wi-Fi connection
 
-### 2.1. Configurer `wpa_supplicant`
-`wpa_supplicant` est utilisé pour gérer les connexions Wi-Fi sous Linux. Vous devez créer un fichier de configuration pour `wpa_supplicant` qui contient les détails de votre réseau Wi-Fi.
+### 2.1. Configure wpa_supplicant
+`wpa_supplicantis` used to manage Wi-Fi connections in Linux. You need to create a configuration file for 
+wpa_supplicantit that contains the details of your Wi-Fi network.
 
-1. Créer le fichier de configuration :
+
+1. Create the configuration file:
     ```bash
     sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
     ```
-2. Ajouter la configuration du réseau :
+2. Add network configuration:
     ```bash
     network={
         ssid="votre_ssid"
         psk="votre_mot_de_passe"
     }
     ```
-3. Enregistrer et fermé le fichier avec `Ctrl+O` pour enregistrer `Ctrl+X`.
+3. Save and close the file with `Ctrl+O` to save `Ctrl+X`.
 
-### 2.2. Connexion au réseau Wi-Fi
-Pour connecter manuellement votre serveur au réseau Wi-Fi, utilisez les commandes suivante :
+### 2.2. Connecting to the Wi-Fi network
+To manually connect your server to the Wi-Fi network, use the following commands:
 
-1. Démarrer `wpa_supplicant` :
+1. To start up `wpa_supplicant` :
     ```bash
     sudo wpa_supplicant -B -i wlp3s0 -c /etc/wpa_supplicant/wpa_supplicant.conf
     ```
-    > Remarque : Remplacez `wlp3s0` par le nom de votre interface Wi-Fi, que vous pouvez obtenir avec la commande `ip a`.
+    > Note: Replace <name> `wlp3s0` with the name of your Wi-Fi interface, which you can get with the command `ip a`.
 
-2. Obtenir une adresse IP :
+2. Get an IP address:
     ```bash
     sudo dhclient wlp3s0
     ```
 
-## 3. Automatisation au démarrage
-Pour que le serveur se connecte automatiquement au Wi-Fi au démarrage, nous allons créer un script shell qui exécutera les commandes ci-dessus, puis configurer ce script pour qu'il s'exécute automatiquement.
+## 3. Automation at startup
+To have the server automatically connect to Wi-Fi on startup, we will create a shell script that will run the above commands, and then configure that script to run automatically.
 
-### 3.1. Création du script shell
+### 3.1. Creating the shell script
 
-1. Créer le script :
+1. Create the script:
     ```bash
     sudo nano /usr/local/bin/connect_wifi.sh
     ```
-2. Ajouter les commandes au script :
+2. Add the commands to the script:
     ```bash
     #!/bin/bash
     sudo wpa_supplicant -B -i wlp3s0 -c /etc/wpa_supplicant/wpa_supplicant.conf
     sudo dhclient wlp3s0
     ```
-3. Rendre le script exécutable :
+3. Make the script executable:
     ```bash
     sudo chmod +x /usr/local/bin/connect_wifi.sh
     ```
 
-### 3.2. Intégration du script au démarrage
-Il existe deux principales méthodes pour exécuter ce script automatiquement au démarrage de votre serveur : en utilisant `/etc/rc.local` ou en créant un service `systemd`.
+### 3.2. Integration of the script at startup
+There are two main ways to run this script automatically when your server starts: using `/etc/rc.local` or creating a service `systemd`.
 
-#### Option 1 : Utiliser `/etc/rc.local`
+#### Option 1: Use `/etc/rc.local`
 
-1. Modifier `/etc/rc.local` :
-    - Si le fichier `/etc/rc.local` n'existe pas, créez-le :
+1. To modify `/etc/rc.local` :
+    - If the File `/etc/rc.local` does not exist, create it:
     ```bash
     sudo nano /etc/rc.local
     ```
-2. Ajouter le script au fichier :
-    Ajoutez la ligne suivante avant `exit 0` :
+2. Add the script to the file:
+    Add the following line before `exit 0` :
     ```bash
     /usr/local/bin/connect_wifi.sh
     ```
-3. Rendre `/etc/rc.local` exécutable (si ce n’est pas déjà fait) :
+3. Make `/etc/rc.local` executable (if not already done):
     ```bash
     sudo chmod +x /etc/rc.local
     ```
 
-#### Option 2 : Créer un service `systemd`
+#### Option 2 : Create a service `systemd`
 
-1. Créer un fichier de service `systemd` :
+1. Create a service file `systemd` :
     ```bash
     sudo nano /etc/systemd/system/connect_wifi.service
     ```
-2. Ajouter la configuration suivante au fichier :
+2. Add the following configuration to the file:
     ```bash
     [Unit]
     Description=Connect to Wi-Fi at startup
@@ -106,27 +108,26 @@ Il existe deux principales méthodes pour exécuter ce script automatiquement au
     [Install]
     WantedBy=multi-user.target
     ```
-3. Activer le service :
-    Pour que le service soit exécuté au démarrage :
+3. Enable the service:
+    To have the service run at startup:
     ```bash
     sudo systemctl enable connect_wifi.service
     ```
-4. Tester le service :
-    Pour démarrer le service manuellement et vérifier son fonctionnement :
+4. Test the service:
+    To start the service manually and verify its operation
     ```bash
     sudo systemctl start connect_wifi.service
     ```
 
-## 4. Configuration du Pont Réseau (`vmbr0`) avec l'Interface Wi-Fi (actuellement en test)
-Proxmox utilise `vmbr0` pour connecter les machines virtuelles au réseau. Si vous souhaitez que `vmbr0` soit dans le même réseau que `wlp3s0` (votre interface Wi-Fi), vous devez configurer le pont réseau pour utiliser l'interface Wi-Fi.
+## 4. Network Bridge Configuration `( vmbr0)` with Wi-Fi Interface (currently under testing)
+Proxmox uses `vmbr0` to connect virtual machines to the network. If you want it to `vmbr0` be in the same network as `wlp3s0`(your Wi-Fi interface), you must configure the network bridge to use the Wi-Fi interface.
+### 4.1. Configure `/etc/network/interfaces`
 
-### 4.1. Configurer `/etc/network/interfaces`
-
-1. Modifier `/etc/network/interfaces` :
+1. To Modify `/etc/network/interfaces` :
     ```bash
     sudo nano /etc/network/interfaces
     ```
-2. Ajouter ou modifier la configuration suivante :
+2. Add or modify the following configuration:
     ```bash
     auto wlp3s0
     iface wlp3s0 inet manual
@@ -137,28 +138,28 @@ Proxmox utilise `vmbr0` pour connecter les machines virtuelles au réseau. Si vo
         bridge_stp off
         bridge_fd 0
     ```
-    > Remarque : Si la carte Wi-Fi ne supporte pas le mode pont, cette configuration pourrait ne pas fonctionner. Dans ce cas, vous devrez utiliser un autre moyen, comme la configuration de NAT avec `iptables`.
-
-3. Redémarrer les interfaces réseau :
+    > Note: If the Wi-Fi card does not support bridge mode, this configuration may not work. In this case, you will need to use another method, such as configuring NAT with `iptables`.
+    
+3. Restart network interfaces:
     ```bash
     sudo systemctl restart networking
     ```
 
-## 5. Résumé
-Vous avez configuré votre serveur Proxmox pour se connecter automatiquement à un réseau Wi-Fi au démarrage en utilisant un script shell, et vous avez intégré ce script dans le processus de démarrage en utilisant soit `/etc/rc.local`, soit un service `systemd`. De plus, vous avez configuré le pont réseau `vmbr0` pour fonctionner dans le même réseau que `wlp3s0`.
+## 5. Summary
+You have configured your Proxmox server to automatically connect to a Wi-Fi network at startup using a shell script, and you have integrated this script into the startup process using either `/etc/rc.local`, or a service `systemd`. Additionally, you have configured the network bridge `vmbr0` to operate in the same network as `wlp3s0`.
 
-## 6. Dépannage
+## 6. Troubleshooting
 
-- **Vérifiez le statut du service** : Si vous utilisez `systemd`, vous pouvez vérifier le statut du service pour diagnostiquer des problèmes :
+- **Check service status** : Si vous utilisez `systemd`, vous pouvez vérifier le statut du service pour diagnostiquer des problèmes :
     ```bash
     sudo systemctl status connect_wifi.service
     ```
-- **Logs de `wpa_supplicant`** : Les erreurs liées à `wpa_supplicant` peuvent être examinées dans les logs système :
+- **Logs of `wpa_supplicant`** : Errors related to `wpa_supplicant` can be examined int the system logs:
     ```bash
     sudo journalctl -u wpa_supplicant
     ```
-- **Redémarrage manuel des services** : Si quelque chose ne fonctionne pas comme prévu, redémarrez manuellement les services ou le serveur pour voir si le problème persiste.
+- **Manually restart services** : If something isn't working as expected, manually restart the services or the server to see if the problem persists.
 
 ---
 
-Cette documentation devrait vous aider à configurer et automatiser la connexion Wi-Fi sur votre serveur Proxmox, ainsi qu'à configurer un pont réseau pour vos machines virtuelles. Si vous rencontrez des difficultés supplémentaires, n’hésitez pas à les revisiter ou à demander de l'aide supplémentaire.
+This documentation should help you configure and automate Wi-Fi on your Proxmox server, as well as configure a network bridge for your virtual machines. If you encounter any additional difficulties, please feel free to revisit these guidelines or ask for additional assistance.
